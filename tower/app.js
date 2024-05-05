@@ -1,3 +1,6 @@
+//Imports
+const publisher = require("./publisher");
+const msg = { number: 2 };
 // Packages
 const express = require("express");
 const PORT = process.env.PORT || 2000;
@@ -16,3 +19,5 @@ app.get("/", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Running on port = ${PORT}`);
 });
+
+publisher.connect();
