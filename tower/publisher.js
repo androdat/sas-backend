@@ -24,6 +24,7 @@ const sendMessageToQue = (data) => {
   try {
     channel.sendToQueue("sensorData", Buffer.from(JSON.stringify(data)));
     console.log("Sent Successfully");
+    return true;
   } catch (err) {
     console.log(err);
   }
