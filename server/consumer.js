@@ -1,3 +1,5 @@
+//Imports
+const util = require("./utils/util");
 const amqp = require("amqplib");
 
 let channel, connection;
@@ -14,6 +16,10 @@ const connect = async () => {
     channel.consume("sensorData", (msg) => {
       const sensorData = JSON.parse(msg.content.toString());
       console.log(sensorData);
+      if (sensorData.hasOwnProperty("sensorData")) {
+        util.handleIncomingServerData(sensorData);
+        channel.ack(msg);
+      }
     });
 
     console.log("Waiting for messages...");

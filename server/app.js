@@ -24,7 +24,7 @@ app.use(express.urlencoded({ extended: false }));
 //sockets
 io.on("connection", (socket) => {
   console.log("a new user connected", socket.id);
-  socket.emit("sensorData", "world");
+  socket.emit("testData", "Test data from socket server");
 });
 
 app.get("/", (req, res) => {
