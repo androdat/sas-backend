@@ -94,9 +94,19 @@ const createAnomalie = async (req, res) => {
   else res.status(500).json({ error: "Internal Server Error" });
 };
 
+const disconnect = (req, res) => {
+  const result = publisher.closeConnection();
+  if (result)
+    res.status(200).send({
+      msg: "Disconnected from RabitMQ",
+    });
+  else res.status(500).json({ error: "Internal Server Error" });
+};
+
 const towerController = {
   createSingle,
   createAnomalie,
+  disconnect,
 };
 
 module.exports = towerController;

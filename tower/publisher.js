@@ -1,7 +1,6 @@
 const amqp = require("amqplib");
 
 let channel, connection;
-const msg = { number: 2 };
 const connect = async () => {
   try {
     connection = await amqp.connect(
@@ -36,6 +35,7 @@ const closeConnection = async () => {
 
   console.log("Closing connection...");
   await connection.close();
+  return true;
 };
 
 // connect();
