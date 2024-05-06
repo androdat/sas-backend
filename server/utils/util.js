@@ -29,14 +29,7 @@ const handleIncomingServerData = async (sensorData) => {
 
   console.log("modifiedSensorDataArray =", modifiedSensorDataArray);
 
-  //Send alarm to frontend if any anomalies detected
-  if (anomalieData.length > 0) {
-    console.log("----anomalieData----", anomalieData);
-    global.io.emit("sensorDataWithAnomalies", {
-      eventName: "sensorDataWithAnomalies",
-      data: anomalieData,
-    });
-  }
+
 
   //Insert into DB
   try {
@@ -49,6 +42,47 @@ const handleIncomingServerData = async (sensorData) => {
     });
   } catch (error) {
     console.error("Error inserting sensor data:", error.message);
+  }
+
+    //Send alarm to frontend if any anomalies detected first 2 cases
+    if (anomalieData.length > 0) {
+      console.log("----anomalieData----", anomalieData);
+      global.io.emit("sensorDataWithAnomalies", {
+        eventName: "sensorDataWithAnomalies",
+        data: anomalieData,
+      });
+    }
+
+  //Check third Anomalie
+  // Query MongoDB to get the previous sensor data for 2 minutes taking asumption 2hrs = 2mins
+  const currentTime = new Date();
+  const startTime = new Date(currentTime);
+  startTime.setMinutes(startTime.getMinutes() - 2);
+
+  const previousSensorData = await Sensor.find({
+    power: "DG",
+    createdAt: { $gte: startTime, $lte: currentTime },
+  });
+  console.log("---3rd case---");
+  console.log(previousSensorData);
+  if (previousSensorData.length > 0) {
+    console.log("updating...");
+    await Sensor.updateMany(
+      {
+        _id: { $in: previousSensorData.map((data) => data._id) },
+      },
+      { $set: { anomalies: true } }
+    );
+
+    // Retrieve the updated sensor readings
+    const updatedSensorReadings = await Sensor.find({
+      _id: { $in: previousSensorData.map((data) => data._id) },
+    });
+    //If anomalies detected for last 2 mins ie power source is DG send socket event
+    global.io.emit("sensorData", {
+      eventName: "powerAnomalie",
+      data: updatedSensorReadings,
+    });
   }
 };
 
