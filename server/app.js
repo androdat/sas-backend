@@ -19,12 +19,17 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // Routes imports
-// const apiRoutes = require("./routes/index");
+const apiRoutes = require("./routes/index");
 
 //sockets
 io.on("connection", (socket) => {
   console.log("a new user connected", socket.id);
   socket.emit("testData", "Test data from socket server");
+});
+
+// Example Socket.IO error event handler
+io.on("error", (err) => {
+  console.error("Socket.IO error:", err);
 });
 
 app.get("/", (req, res) => {
@@ -41,8 +46,10 @@ mongoose
   });
 
 // Routes
+app.use("/", apiRoutes);
 // app.use("/", apiRoutes);
 server.listen(PORT, () => {
   console.log(`Running on port = ${PORT}`);
 });
 consumer.connect();
+
