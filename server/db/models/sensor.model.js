@@ -4,7 +4,7 @@ const sensorSchema = mongoose.Schema(
   {
     tower_id: {
       type: String,
-      required: false,
+      required: true,
     },
     lat: {
       type: Number,

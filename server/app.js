@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 4000;
 const app = express();
 const server = http.createServer(app);
 const { Server } = require("socket.io");
-//const io = new Server(server);
+
 global.io = new Server(server);
 
 // Middlewares
@@ -36,6 +36,7 @@ app.get("/", (req, res) => {
   res.status(200).send("Security Alarm System Backend up and running...");
 });
 
+//Change to env later
 mongoose
   .connect(
     "mongodb+srv://androdat:1234@task.ubmnwno.mongodb.net/?retryWrites=true&w=majority&appName=Task"

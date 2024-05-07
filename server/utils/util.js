@@ -1,7 +1,6 @@
 // DB
 const Sensor = require("../db/models/sensor.model");
 const handleIncomingServerData = async (sensorData) => {
-  console.log("---from inside handleIncomingServerData---");
   let dataArray = sensorData.sensorData;
   let anomalieData = [];
   const modifiedSensorDataArray = dataArray.map((item) => {
@@ -21,23 +20,22 @@ const handleIncomingServerData = async (sensorData) => {
   });
 
   //Retrieve last 20 sec records for this tower and check if one electric is present if yes then not an anomalie
+  //My asumption is 2hrs = 20sec
   let isAnAnomalie = false;
+  let oldData;
   for (const item of modifiedSensorDataArray) {
-    console.log("item from array", item);
     try {
       // Calculate the timestamp for 20 seconds ago
       var twentySecondsAgo = new Date();
       twentySecondsAgo.setSeconds(twentySecondsAgo.getSeconds() - 20);
 
-      const oldData = await Sensor.find({
+      oldData = await Sensor.find({
         createdAt: { $gt: twentySecondsAgo },
         tower_id: item.tower_id,
       });
 
-      console.log("oldData", oldData);
       if (oldData.length > 0) {
         for (const entry of oldData) {
-          console.log("old entry", entry);
           if (entry.power.toLowerCase() === "electric") {
             isAnAnomalie = false; // If electric power found
             break;
@@ -49,12 +47,13 @@ const handleIncomingServerData = async (sensorData) => {
     } catch (error) {
       console.error("Error fetching old data:", error);
     }
-    item.anomalies = isAnAnomalie;
+    if (oldData.length > 0) {
+      item.anomalies = isAnAnomalie;
+    }
+
     if (item.anomalies) {
       anomalieData.push(item);
     }
-    console.log("isAnAnomalie", isAnAnomalie);
-    console.log("ITEM OF MODIFIED modifiedSensorDataArray", item);
   }
 
   //Insert into DB
@@ -73,7 +72,6 @@ const handleIncomingServerData = async (sensorData) => {
 
   //Send alarm to frontend if any anomalies detected first 2 cases
   if (anomalieData.length > 0) {
-    console.log("----anomalieData----", anomalieData);
     global.io.emit("sensorDataWithAnomalies", {
       eventName: "sensorDataWithAnomalies",
       data: anomalieData,

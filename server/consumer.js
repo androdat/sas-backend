@@ -6,6 +6,7 @@ let channel, connection;
 
 const connect = async () => {
   try {
+    //Change to env later
     connection = await amqp.connect(
       "amqps://xuycmald:xXbdjVqg3z6Hz3KhA2bVzJAbaW3M4U8d@puffin.rmq2.cloudamqp.com/xuycmald"
     );
