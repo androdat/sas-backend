@@ -2,6 +2,10 @@ const mongoose = require("mongoose");
 
 const sensorSchema = mongoose.Schema(
   {
+    tower_id: {
+      type: String,
+      required: false,
+    },
     lat: {
       type: Number,
       required: [true, "Please enter latitude"],

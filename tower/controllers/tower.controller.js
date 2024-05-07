@@ -1,10 +1,11 @@
 //Imports
 const { v4: uuidv4 } = require("uuid");
 const publisher = require("../publisher");
+const testData = require("./test.json");
 
 const createSingle = async (req, res) => {
   let sensorData = {
-    id: uuidv4(),
+    tower_id: uuidv4(),
     lat: Math.floor(Math.random() * 181) - 90,
     lng: Math.floor(Math.random() * 361) - 180,
     temp: Math.floor(Math.random() * 50),
@@ -63,7 +64,7 @@ const createAnomalie = async (req, res) => {
     case "3":
       //if fuel is DG for past 2 hours ie last 5 reading basically produce last 5 readings with fuel as DG
       const sensorDataThirdAnomalie = Array.from({ length: 5 }, () => ({
-        id: 1,
+        tower_id: 1,
         lat: Math.floor(Math.random() * 181) - 90,
         lng: Math.floor(Math.random() * 361) - 180,
         temp: Math.floor(Math.random() * 50),
@@ -103,10 +104,42 @@ const disconnect = (req, res) => {
   else res.status(500).json({ error: "Internal Server Error" });
 };
 
+const createPowerAnomalie = async (req, res) => {
+  async function iterateData() {
+    const tower1Data = testData['tower 1'];
+    const tower2Data = testData['tower 2'];
+  
+    for (let i = 0; i < tower1Data.length || i < tower2Data.length; i++) {
+      if (tower1Data[i]) {
+        console.log('Tower 1 Data:', tower1Data[i]);
+        let queData = { sensorData: [tower1Data[i]] };
+        const result = publisher.sendMessageToQue(queData);
+        await sleep(5000); // Wait for 5 seconds
+      }
+      if (tower2Data[i]) {
+        console.log('Tower 2 Data:', tower2Data[i]);
+        let queData = { sensorData: [tower2Data[i]] };
+        const result = publisher.sendMessageToQue(queData);
+        await sleep(5000); // Wait for 5 seconds
+      }
+    }
+  }
+  
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+  iterateData();
+
+  res.status(200).send({
+    msg: "Started Publishing Anomalie Data",
+  });
+};
+
 const towerController = {
   createSingle,
   createAnomalie,
   disconnect,
+  createPowerAnomalie,
 };
 
 module.exports = towerController;

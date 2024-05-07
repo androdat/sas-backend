@@ -1,0 +1,27 @@
+{
+  "tower 1": [
+    { "tower_id": 1, "lat": 10, "lng": 10, "temp": "40", "fuel": 30, "power": "Electric" },
+    { "tower_id": 1, "lat": 10, "lng": 10, "temp": "40", "fuel": 30, "power": "Electric" },
+    { "tower_id": 1, "lat": 10, "lng": 10, "temp": "40", "fuel": 30, "power": "DG" },
+    { "tower_id": 1, "lat": 10, "lng": 10, "temp": "40", "fuel": 30, "power": "DG" },
+    { "tower_id": 1, "lat": 10, "lng": 10, "temp": "40", "fuel": 30, "power": "DG" },
+    { "tower_id": 1, "lat": 10, "lng": 10, "temp": "40", "fuel": 30, "power": "DG" },
+    { "tower_id": 1, "lat": 10, "lng": 10, "temp": "40", "fuel": 30, "power": "DG" },
+    { "tower_id": 1, "lat": 10, "lng": 10, "temp": "40", "fuel": 30, "power": "Electric" },
+    { "tower_id": 1, "lat": 10, "lng": 10, "temp": "40", "fuel": 30, "power": "Electric" },
+    { "tower_id": 1, "lat": 10, "lng": 10, "temp": "40", "fuel": 30, "power": "Electric" }
+  ],
+  "tower 2": [
+    { "tower_id": 2, "lat": 20, "lng": 40, "temp": "40", "fuel": 30, "power": "DG" },
+    { "tower_id": 2, "lat": 20, "lng": 40, "temp": "40", "fuel": 30, "power": "DG" },
+    { "tower_id": 2, "lat": 20, "lng": 40, "temp": "40", "fuel": 30, "power": "DG" },
+    { "tower_id": 2, "lat": 20, "lng": 40, "temp": "40", "fuel": 30, "power": "DG" },
+    { "tower_id": 2, "lat": 20, "lng": 40, "temp": "40", "fuel": 30, "power": "DG" },
+    { "tower_id": 2, "lat": 20, "lng": 40, "temp": "40", "fuel": 30, "power": "Electric" },
+    { "tower_id": 2, "lat": 20, "lng": 40, "temp": "40", "fuel": 30, "power": "Electric" },
+    { "tower_id": 2, "lat": 20, "lng": 40, "temp": "40", "fuel": 30, "power": "Electric" },
+    { "tower_id": 2, "lat": 20, "lng": 40, "temp": "40", "fuel": 30, "power": "Electric" },
+    { "tower_id": 2, "lat": 20, "lng": 40, "temp": "40", "fuel": 30, "power": "Electric" }
+
+  ]
+}

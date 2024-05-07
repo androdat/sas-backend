@@ -1,14 +1,10 @@
 // DB
 const Sensor = require("../db/models/sensor.model");
-
 const handleIncomingServerData = async (sensorData) => {
   console.log("---from inside handleIncomingServerData---");
-  console.log(sensorData);
   let dataArray = sensorData.sensorData;
-  console.log(dataArray);
   let anomalieData = [];
   const modifiedSensorDataArray = dataArray.map((item) => {
-    console.log(item.id);
     switch (true) {
       case item.temp > 45:
         item.anomalies = true;
@@ -18,22 +14,53 @@ const handleIncomingServerData = async (sensorData) => {
         item.anomalies = true;
         anomalieData.push(item);
         break;
-      //   case !data.hasOwnProperty("sensorData"):
-      //     console.log("sensorData is not present");
-      //     break;
       default:
         item.anomalies = false;
     }
     return item;
   });
 
-  console.log("modifiedSensorDataArray =", modifiedSensorDataArray);
+  //Retrieve last 20 sec records for this tower and check if one electric is present if yes then not an anomalie
+  let isAnAnomalie = false;
+  for (const item of modifiedSensorDataArray) {
+    console.log("item from array", item);
+    try {
+      // Calculate the timestamp for 20 seconds ago
+      var twentySecondsAgo = new Date();
+      twentySecondsAgo.setSeconds(twentySecondsAgo.getSeconds() - 20);
 
+      const oldData = await Sensor.find({
+        createdAt: { $gt: twentySecondsAgo },
+        tower_id: item.tower_id,
+      });
 
+      console.log("oldData", oldData);
+      if (oldData.length > 0) {
+        for (const entry of oldData) {
+          console.log("old entry", entry);
+          if (entry.power.toLowerCase() === "electric") {
+            isAnAnomalie = false; // If electric power found
+            break;
+          } else {
+            isAnAnomalie = true; // If no electric power found, return false
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching old data:", error);
+    }
+    item.anomalies = isAnAnomalie;
+    if (item.anomalies) {
+      anomalieData.push(item);
+    }
+    console.log("isAnAnomalie", isAnAnomalie);
+    console.log("ITEM OF MODIFIED modifiedSensorDataArray", item);
+  }
 
   //Insert into DB
+  let insertedData;
   try {
-    let insertedData = await Sensor.insertMany(modifiedSensorDataArray);
+    insertedData = await Sensor.insertMany(modifiedSensorDataArray);
     console.log("Bulk insertion successful:", insertedData);
     //send socket event
     global.io.emit("sensorData", {
@@ -44,44 +71,12 @@ const handleIncomingServerData = async (sensorData) => {
     console.error("Error inserting sensor data:", error.message);
   }
 
-    //Send alarm to frontend if any anomalies detected first 2 cases
-    if (anomalieData.length > 0) {
-      console.log("----anomalieData----", anomalieData);
-      global.io.emit("sensorDataWithAnomalies", {
-        eventName: "sensorDataWithAnomalies",
-        data: anomalieData,
-      });
-    }
-
-  //Check third Anomalie
-  // Query MongoDB to get the previous sensor data for 2 minutes taking asumption 2hrs = 2mins
-  const currentTime = new Date();
-  const startTime = new Date(currentTime);
-  startTime.setMinutes(startTime.getMinutes() - 2);
-
-  const previousSensorData = await Sensor.find({
-    power: "DG",
-    createdAt: { $gte: startTime, $lte: currentTime },
-  });
-  console.log("---3rd case---");
-  console.log(previousSensorData);
-  if (previousSensorData.length > 0) {
-    console.log("updating...");
-    await Sensor.updateMany(
-      {
-        _id: { $in: previousSensorData.map((data) => data._id) },
-      },
-      { $set: { anomalies: true } }
-    );
-
-    // Retrieve the updated sensor readings
-    const updatedSensorReadings = await Sensor.find({
-      _id: { $in: previousSensorData.map((data) => data._id) },
-    });
-    //If anomalies detected for last 2 mins ie power source is DG send socket event
-    global.io.emit("sensorData", {
-      eventName: "powerAnomalie",
-      data: updatedSensorReadings,
+  //Send alarm to frontend if any anomalies detected first 2 cases
+  if (anomalieData.length > 0) {
+    console.log("----anomalieData----", anomalieData);
+    global.io.emit("sensorDataWithAnomalies", {
+      eventName: "sensorDataWithAnomalies",
+      data: anomalieData,
     });
   }
 };
